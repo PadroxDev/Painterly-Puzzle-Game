@@ -75,9 +75,51 @@ Shader "Hidden/Oil Painting/Structure Tensor"
                 ) / 4.0;    
             }
         
+            float3 StructureTensor(float2 uv)
+            {
+                float3 u = SobelU(uv);
+                float3 v = SobelV(uv);
+            
+                return float3(dot(u, u), dot(v, v), dot(u, v));
+            }
+
+            float3 SmoothedStructureTensor(float2 uv, float sigma)
+            {
+                float twiceSigmaSq = 2.0f * sigma * sigma;
+                int halfWidth = ceil(2 * sigma);
+            
+                float3 col = float3(0, 0, 0);
+                float norm = 0;
+                for (int i = -halfWidth; i <= halfWidth; i++)
+                {
+                    for (int j = -halfWidth; j <= halfWidth; j++)
+                    {
+                        float distance = sqrt(i*i + j*j);
+                        float k = exp(-distance * distance / twiceSigmaSq);
+            
+                        col += StructureTensor(uv + float2(i * PIXEL_X, j * PIXEL_Y)) * k;
+                        norm += k;
+                    }
+                }
+            
+                return col / norm;
+            }
+
             half4 frag(Varyings input) : SV_Target
             {
-                return half4(length(SobelU(input.uv)), 0, length(SobelV(input.uv)), 0);
+                float3 t = SmoothedStructureTensor(input.uv, 2.0f);
+                
+                float lambda1 = 0.5f * (t.x + t.y + sqrt((t.x - t.y) * (t.x - t.y) + 4.0f * t.z * t.z));
+                float lambda2 = 0.5f * (t.x + t.y - sqrt((t.x - t.y) * (t.x - t.y) + 4.0f * t.z * t.z));
+                
+                float2 direction = float2(lambda1 - t.x, -t.z);
+                direction = (length(direction) > 0.0) ? normalize(direction) : float2(0, 1);
+                
+                float angle = atan2(direction.y, direction.x);
+                
+                float anisotropy = (lambda1 + lambda2 <= 0.0) ? 0.0 : (lambda1 - lambda2) / (lambda1 + lambda2);
+                
+                return half4(direction, angle, anisotropy);
             }
         
             #pragma vertex vert
