@@ -27,7 +27,7 @@ MonoBehaviour:
       streamKernelStrength: 0.5
     compositorSettings:
       edgeContribution: 1
-      flowContribution: 1
+      flowContribution: 1.4
       depthContribution: 1
       bumpPower: 0.8
       bumpIntensity: 0.4
