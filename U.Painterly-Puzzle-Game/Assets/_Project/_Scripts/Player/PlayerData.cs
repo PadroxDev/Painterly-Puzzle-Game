@@ -9,6 +9,7 @@ namespace Padrox
     {
         [Header("Movement")]
         public float MoveSpeed;
+        public float BackwardSpeedMultiplier;
         public float RotationSpeed;
         public float GroundDrag;
         public float AirDrag;
