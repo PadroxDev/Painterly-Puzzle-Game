@@ -18,8 +18,8 @@ MonoBehaviour:
   BackwardMinAngle: 10
   GroundDrag: 5
   AirDrag: 0
-  GroundCheckDistance: 0.2
-  SlopeCheckDistance: 0.3
+  GroundCheckDistance: 0.3
+  SlopeCheckDistance: 0.2
   MaxSlopeAngle: 40
   WhatIsGround:
     serializedVersion: 2
