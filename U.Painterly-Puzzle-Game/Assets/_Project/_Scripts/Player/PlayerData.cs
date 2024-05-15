@@ -9,8 +9,14 @@ namespace Padrox
     {
         [Header("Movement")]
         public float MoveSpeed;
-        public float BackwardSpeedMultiplier;
         public float RotationSpeed;
+
+        [Space]
+        public float BackwardSpeedMultiplier;
+        [Tooltip("Angle between MoveDir and Camera back vector to determine if the player is moving backwards")]
+        public float BackwardMinAngle;
+
+        [Space]
         public float GroundDrag;
         public float AirDrag;
 

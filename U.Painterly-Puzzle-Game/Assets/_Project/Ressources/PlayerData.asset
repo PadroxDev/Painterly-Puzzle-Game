@@ -12,8 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4186699998af7224ca91cd9f189c2a9c, type: 3}
   m_Name: PlayerData
   m_EditorClassIdentifier: 
-  MoveSpeed: 5.5
+  MoveSpeed: 6
   RotationSpeed: 7
+  BackwardSpeedMultiplier: 0.7
+  BackwardMinAngle: 10
   GroundDrag: 5
   AirDrag: 0
   GroundCheckDistance: 0.2

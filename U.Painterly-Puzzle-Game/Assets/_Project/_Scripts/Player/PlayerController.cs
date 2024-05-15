@@ -20,15 +20,29 @@ namespace Padrox {
         private bool _isGrounded;
         private bool _isOnSlope;
         private bool _isOnSlopeDirty;
+        private bool _movingBackward;
+        private bool _movingBackwardDirty;
         private RaycastHit _slopeHit;
+        
+        public float CurrentSpeed { get; private set; }
+
+        public Vector2 InputDir {
+            get { return _inputDir; }
+        }
 
         private void Awake() {
             _rb = GetComponent<Rigidbody>();
             _cam = Helpers.Camera;
 
             _inputDir = Vector2.zero;
+
+            _isGrounded = false;
             _isOnSlope = false;
             _isOnSlopeDirty = true;
+            _movingBackward = false;
+            _movingBackwardDirty = true;
+
+            CurrentSpeed = 0;
         }
 
         private void Start() {
@@ -44,6 +58,7 @@ namespace Padrox {
             HandleRotation();
             ApplyDrag();
             RestraintSpeed();
+            CurrentSpeed = _rb.velocity.magnitude;
         }
 
         private void GroundCheck() {
@@ -66,12 +81,13 @@ namespace Padrox {
             if (_moveDir == Vector3.zero) return;
 
             Vector3 dir = OnSlope() ? GetSlopeMoveDirection() : _moveDir;
-            _rb.AddForce(dir * _data.MoveSpeed * MOVE_SPEED_MUL, ForceMode.Force);
+            _rb.AddForce(dir * GetMaxSpeed() * MOVE_SPEED_MUL, ForceMode.Force);
         }
 
         private void HandleRotation() {
             if (_moveDir == Vector3.zero) return;
-            transform.forward = Vector3.Slerp(transform.forward, _moveDir.normalized, Time.fixedDeltaTime * _data.RotationSpeed);
+            Vector3 rotateTowards = IsMovingBackward() ? _moveDir * -1 : _moveDir;
+            transform.forward = Vector3.Slerp(transform.forward, rotateTowards.normalized, Time.fixedDeltaTime * _data.RotationSpeed);
         }
 
         private void ApplyDrag() {
@@ -87,9 +103,10 @@ namespace Padrox {
             }
 
             float speed = vel.magnitude;
-            if (speed <= _data.MoveSpeed) return;
+            float maxSpeed = GetMaxSpeed();
+            if (speed <= GetMaxSpeed()) return;
 
-            Vector3 restraintSpeed = vel.normalized * _data.MoveSpeed;
+            Vector3 restraintSpeed = vel.normalized * maxSpeed;
             if (!OnSlope()) { // Apply the current downwards velocity
                 restraintSpeed += Vector3.up * _rb.velocity.y;
             }
@@ -112,12 +129,28 @@ namespace Padrox {
             return _isOnSlope;
         }
 
+        private bool IsMovingBackward() {
+            if(_movingBackwardDirty) {
+                _movingBackwardDirty = false;
+                Vector3 camBack = new Vector3(-_cam.transform.forward.x, 0, -_cam.transform.forward.z);
+                float backwardAngle = Vector3.Angle(camBack, _moveDir);
+                _movingBackward = backwardAngle < _data.BackwardMinAngle;
+            }
+
+            return _movingBackward;
+        }
+
         private Vector3 GetSlopeMoveDirection() {
             return Vector3.ProjectOnPlane(_moveDir, _slopeHit.normal);
         }
 
         private void Cleanup() {
             _isOnSlopeDirty = true;
+            _movingBackwardDirty = true;
+        }
+
+        public float GetMaxSpeed() {
+            return IsMovingBackward() ? _data.MoveSpeed * _data.BackwardSpeedMultiplier : _data.MoveSpeed;
         }
 
         private void OnDrawGizmosSelected() {
