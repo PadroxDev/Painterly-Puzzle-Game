@@ -6,8 +6,10 @@ namespace Padrox {
     public class  PlayerController : MonoBehaviour {
         private const float MOVE_SPEED_MUL = 10f;
 
-        [ExposedScriptableObject, SerializeField]
-        private PlayerData _data;
+#if UNITY_EDITOR
+        [ExposedScriptableObject]
+#endif
+        [SerializeField] private PlayerData _data;
 
         [Header("References")]
         [SerializeField] private Transform _groundCheck;

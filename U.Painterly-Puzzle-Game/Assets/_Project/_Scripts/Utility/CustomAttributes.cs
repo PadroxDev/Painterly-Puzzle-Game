@@ -7,6 +7,7 @@ namespace Padrox
 {
     public class ExposedScriptableObjectAttribute : PropertyAttribute { }
 
+#if UNITY_EDITOR
     [CustomPropertyDrawer(typeof(ExposedScriptableObjectAttribute))]
     public class ExposedScriptableObjectAttributeDrawer : PropertyDrawer {
         private Editor _editor = null;
@@ -29,4 +30,5 @@ namespace Padrox
             }
         }
     }
+#endif
 }
